@@ -1,10 +1,9 @@
 import { useEffect, useState } from "react";
 
-const FetchData = ({ userinput }) => {
+const FetchData = ({ userinput , sizeQr , formatQr }) => {
   const [qrcoderes, setQrcoderes] = useState(null); // store response object
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
-
   const generateQr = async () => {
     setLoading(true);
     setError(null);
@@ -13,7 +12,11 @@ const FetchData = ({ userinput }) => {
       const response = await fetch(BackenApi, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text: userinput }),
+        body: JSON.stringify({ 
+            text: userinput ,
+            size: sizeQr ,
+            format : formatQr
+        }),
       });
 
       if (!response.ok) throw new Error("Error fetching API");
@@ -29,17 +32,18 @@ const FetchData = ({ userinput }) => {
 
   useEffect(() => {
     if (userinput) generateQr();
-  }, [userinput]);
+  }, [userinput , sizeQr , formatQr]);
 
   const downloadImage = () => {
     if (!qrcoderes?.qr) return;
 
-    const link = document.createElement("a");
+   const link = document.createElement("a");
     link.href = qrcoderes.qr;
-    link.download = "qr-code.png";
+    link.download = `qr-code.${formatQr}`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+
   };
 
   if (loading) return <h3>Generating QR code...</h3>;
@@ -58,7 +62,6 @@ const FetchData = ({ userinput }) => {
           <button onClick={downloadImage} className="btn">
             Download QR Code
           </button>
-       
         </div>
       )}
     </>
